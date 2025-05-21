@@ -88,3 +88,62 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom carousel styles */
+.category-carousel .slick-prev,
+.category-carousel .slick-next {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.category-carousel .slick-dots {
+  display: none !important;
+}
+
+.carousel-arrow {
+  @apply absolute top-1/2 -translate-y-1/2 w-10 h-10 z-20 flex justify-center items-center;
+}
+
+.carousel-arrow-prev {
+  @apply -left-10;
+}
+
+.carousel-arrow-next {
+  @apply -right-10;
+}
+
+.category-carousel .slick-track {
+  @apply cursor-grab;
+}
+
+.category-carousel .slick-track:active {
+  @apply cursor-grabbing;
+}
+
+.carousel-arrow-btn {
+  @apply flex justify-center items-center w-10 h-10 rounded-full bg-black/50 text-white text-base cursor-pointer transition-all duration-300 shadow-md;
+}
+
+.carousel-arrow-btn:hover {
+  @apply bg-black/80 shadow-lg;
+}
+
+/* Search component styles */
+.search-input-focus {
+  @apply ring-2 ring-emerald-500 border-emerald-500;
+}
+
+.recent-searches-dropdown {
+  @apply shadow-lg border border-gray-200 rounded-lg overflow-hidden max-h-[200px] overflow-y-auto;
+}
+
+.recent-search-item {
+  @apply flex items-center px-4 py-2 hover:bg-gray-50 text-gray-700 transition;
+}
+
+.recent-search-clear {
+  @apply text-xs text-gray-500 hover:text-red-500 cursor-pointer;
+}

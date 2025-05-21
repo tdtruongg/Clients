@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { message } from "antd";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
@@ -9,14 +9,31 @@ import Pagination from "../../../components/Pagination";
 
 export default function Blog() {
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchParams] = useSearchParams();
+  const categoryId = searchParams.get("category");
+  const searchQuery = searchParams.get("search");
   const POSTS_PER_PAGE = 9;
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [categoryId, searchQuery]);
+
   const { data, isLoading, error } = useQuery({
-    queryKey: ["blogPosts", { page: currentPage, limit: POSTS_PER_PAGE }],
+    queryKey: [
+      "blogPosts",
+      {
+        page: currentPage,
+        limit: POSTS_PER_PAGE,
+        category: categoryId,
+        search: searchQuery,
+      },
+    ],
     queryFn: () =>
       postApi.getPosts({
         page: currentPage,
         limit: POSTS_PER_PAGE,
+        category: categoryId,
+        search: searchQuery,
       }),
     onError: (error) => {
       console.error("Error fetching posts:", error);
@@ -26,6 +43,7 @@ export default function Blog() {
 
   const blogPosts = data?.data || [];
   const totalPages = data?.pagination?.totalPages || 0;
+  const categoryName = blogPosts[0]?.category?.name || "";
 
   const formatDate = (dateString) => {
     return dayjs(dateString).format("D [Tháng] M, YYYY");
@@ -60,7 +78,13 @@ export default function Blog() {
       <div className="min-h-screen bg-white">
         <div className="bg-emerald-600 py-16">
           <div className="container mx-auto px-4">
-            <h1 className="text-4xl font-bold text-white mb-4">Blog Du Lịch</h1>
+            <h1 className="text-4xl font-bold text-white mb-4">
+              {categoryId
+                ? "Blog Du Lịch - Đang tải..."
+                : searchQuery
+                ? `Blog Du Lịch - Đang tìm kiếm: "${searchQuery}"`
+                : "Blog Du Lịch"}
+            </h1>
             <p className="text-emerald-100 text-lg max-w-2xl">
               Khám phá mẹo du lịch, hướng dẫn và câu chuyện từ khắp nơi trên thế
               giới để truyền cảm hứng cho chuyến phiêu lưu tiếp theo của bạn.
@@ -116,7 +140,13 @@ export default function Blog() {
     <div className="min-h-screen bg-white">
       <div className="bg-emerald-600 py-16">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold text-white mb-4">Blog Du Lịch</h1>
+          <h1 className="text-4xl font-bold text-white mb-4">
+            {categoryId && categoryName
+              ? `Blog Du Lịch - ${categoryName}`
+              : searchQuery
+              ? `Blog Du Lịch - Kết quả tìm kiếm: "${searchQuery}"`
+              : "Blog Du Lịch"}
+          </h1>
           <p className="text-emerald-100 text-lg max-w-2xl">
             Khám phá mẹo du lịch, hướng dẫn và câu chuyện từ khắp nơi trên thế
             giới để truyền cảm hứng cho chuyến phiêu lưu tiếp theo của bạn.

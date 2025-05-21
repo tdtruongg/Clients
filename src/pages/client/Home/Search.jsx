@@ -1,107 +1,65 @@
 import { useState, useEffect } from "react";
-import { MapPin } from "lucide-react";
-import { useNavigate } from 'react-router-dom';
+import { MapPin, X, Search as SearchIcon, Clock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
+const MAX_RECENT_SEARCHES = 5;
 
 const Search = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showRecentSearches, setShowRecentSearches] = useState(false);
+  const [recentSearches, setRecentSearches] = useState([]);
   const navigate = useNavigate();
-  
 
-  // Giả lập danh sách bài viết - trong thực tế bạn sẽ lấy từ API hoặc database
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const articles = [
-    { id: 1, "title": "Hà Nội – Thủ đô ngàn năm văn hiến với sự kết hợp hài hòa giữa truyền thống và hiện đại", 
-              "slug": "ha-noi-thu-do-ngan-nam-van-hien-voi-su-ket-hop-hai-hoa-giua-truyen-thong-va-hien-dai"
-    },
-    { id: 2, "title": "THÀNH PHỐ HỒ CHÍ MINH - METROPOLIS NĂNG ĐỘNG GIỮA LÒNG VIỆT NAM" ,
-              "slug": "thanh-pho-ho-chi-minh-metropolis-nang-dong-giua-long-viet-nam"
-    },
-    { id: 3, "title": "Đà Nẵng - Thành phố đáng sống bên bờ biển miền Trung" ,
-              "slug": "da-nang-thanh-pho-dang-song-ben-bo-bien-mien-trung"
-    },
-    { id: 4, "title": "Hải Phòng - Thành phố Cảng Xinh Đẹp Với Bản Sắc Văn Hóa Độc Đáo"	 ,
-              "slug": "hai-phong-thanh-pho-cang-xinh-dep-voi-ban-sac-van-hoa-doc-dao"
-    },
-    { id: 5, "title": "Phú Quốc – Hòn Đảo Ngọc Rực Rỡ Giữa Biển Khơi"	 ,
-              "slug": "phu-quoc-hon-dao-ngoc-ruc-ro-giua-bien-khoi"
-    },
-    { id: 6, "title": "Singapore – Viên Ngọc Hiện Đại Của Đông Nam Á"	 ,
-              "slug": "singapore-vien-ngoc-hien-dai-cua-dong-nam-a"
-    },
-    { id: 7, "title": "Hà Nội - Mê Cung Di Sản: Hành Trình Xuyên Thế Kỷ Từ Phố Cổ Đến Phồn Hoa"	, 
-              "slug": "ha-noi-me-cung-di-san:-hanh-trinh-xuyen-the-ky-tu-pho-co-den-phon-hoa"
-    },
-    { id: 8, "title": "Bắc Ninh - Cái Nôi Của Văn Hóa Quan Họ Và Di Sản Dân Gian Đặc Sắc"	 ,
-              "slug": "bac-ninh-cai-noi-cua-van-hoa-quan-ho-va-di-san-dan-gian-dac-sac"
-    },
-    { id: 9, "title": "Cao Bằng – Vùng Đất Non Nước Hùng Vĩ Và Bản Sắc Văn Hóa Dân Tộc"	, 
-              "slug": "cao-bang-vung-dat-non-nuoc-hung-vi-va-ban-sac-van-hoa-dan-toc"
-    },
-    { id: 10, "title": "Sa Pa – Nét Quyến Rũ Mộc Mạc Giữa Chốn Mây Ngàn"	 ,
-              "slug": "sa-pa-net-quyen-ru-moc-mac-giua-chon-may-ngan"
-    },
-    { id: 11, "title": "Hà Giang Trong Tôi – Hành Trình Của Tuổi Trẻ Và Tự Do"	 ,
-              "slug": "ha-giang-trong-toi-hanh-trinh-cua-tuoi-tre-va-tu-do"
-    },
-  ];
-
-  // Hàm tìm kiếm và lọc gợi ý
   useEffect(() => {
-    if (searchTerm && searchTerm.length > 0) {
-      const filteredSuggestions = articles.filter(article => 
-        article.title.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setSuggestions(filteredSuggestions);
-      setShowSuggestions(true);
-    } else {
-      setSuggestions([]);
-      setShowSuggestions(false);
+    const savedSearches = localStorage.getItem("recentSearches");
+    if (savedSearches) {
+      setRecentSearches(JSON.parse(savedSearches));
     }
-  }, [searchTerm]);
+  }, []);
 
-  // Hàm xử lý khi chọn một gợi ý
-  const handleSuggestionClick = (article) => {
-    setSearchTerm(article.title);
-    setShowSuggestions(false);
-    navigate(`/blog/${article.slug}`);
+  const saveRecentSearch = (term) => {
+    const newSearches = [
+      term,
+      ...recentSearches.filter((item) => item !== term),
+    ].slice(0, MAX_RECENT_SEARCHES);
+
+    setRecentSearches(newSearches);
+    localStorage.setItem("recentSearches", JSON.stringify(newSearches));
   };
 
-// {Array.isArray(suggestions) && suggestions.length > 0 && (
-//   <ul className="suggestions-list">
-//     {suggestions.map((article) =>
-//       article ? (
-//         <li key={article.id} onClick={() => handleSuggestionClick(article)}>
-//           {article.title}
-//         </li>
-//       ) : null
-//     )}
-//   </ul>
-// )}
+  const handleSearch = () => {
+    if (searchTerm.trim()) {
+      saveRecentSearch(searchTerm.trim());
+      navigate(`/blog?search=${encodeURIComponent(searchTerm.trim())}`);
+    }
+  };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
 
+  const handleClearSearch = () => {
+    setSearchTerm("");
+  };
 
-const handleSearch = () => {
-  if (suggestions.length > 0) {
-    navigate(`/blog/${suggestions[0].slug}`);
-  } else {
-    navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
-  }
-};
+  const handleRecentSearchClick = (term) => {
+    setSearchTerm(term);
+    saveRecentSearch(term);
+    navigate(`/blog?search=${encodeURIComponent(term)}`);
+  };
 
-// Thêm onClick cho nút:
-<button onClick={handleSearch} className="...">
-  Tìm kiếm
-</button>
+  const handleClearRecentSearches = () => {
+    setRecentSearches([]);
+    localStorage.removeItem("recentSearches");
+  };
 
   return (
     <section className="py-8 bg-white">
       <div className="container mx-auto px-4">
         <div className="bg-white rounded-xl shadow-lg p-6 -mt-20 relative z-10 max-w-3xl mx-auto">
           <div className="flex items-end gap-4">
-            {/* Điểm đến */}
             <div className="flex-grow relative">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Điểm đến
@@ -114,42 +72,66 @@ const handleSearch = () => {
                 <input
                   type="text"
                   placeholder="Bạn muốn đi đâu?"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  onFocus={() => {
-                    if (suggestions.length > 0) setShowSuggestions(true);
-                  }}
-                  onBlur={() => {
-                    // Trì hoãn ẩn gợi ý để người dùng có thể click vào gợi ý
-                    setTimeout(() => setShowSuggestions(false), 200);
-                  }}
+                  onKeyDown={handleKeyDown}
+                  onFocus={() => setShowRecentSearches(true)}
+                  onBlur={() =>
+                    setTimeout(() => setShowRecentSearches(false), 200)
+                  }
                 />
+                {searchTerm && (
+                  <button
+                    onClick={handleClearSearch}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                    aria-label="Xóa tìm kiếm"
+                  >
+                    <X size={18} />
+                  </button>
+                )}
+
+                {showRecentSearches &&
+                  recentSearches.length > 0 &&
+                  !searchTerm && (
+                    <div className="absolute left-0 right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
+                      <div className="flex justify-between items-center px-4 py-2 border-b border-gray-100">
+                        <span className="text-sm font-medium text-gray-700">
+                          Tìm kiếm gần đây
+                        </span>
+                        <button
+                          onClick={handleClearRecentSearches}
+                          className="text-xs text-gray-500 hover:text-gray-700"
+                        >
+                          Xóa tất cả
+                        </button>
+                      </div>
+                      <ul>
+                        {recentSearches.map((term, index) => (
+                          <li key={index}>
+                            <button
+                              className="flex items-center w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50"
+                              onClick={() => handleRecentSearchClick(term)}
+                            >
+                              <Clock size={14} className="mr-2 text-gray-400" />
+                              {term}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
               </div>
-              
-              {/* Danh sách gợi ý */}
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                  <ul>
-                    {suggestions.map((article) => (
-                      <li 
-                        key={article.id}
-                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        onClick={() => handleSuggestionClick(article)}
-                      >
-                        {article.title}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </div>
-            
-            {/* Nút tìm kiếm */}
+
             <div>
-              {/* <button className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition"> */}
-                {/* Tìm kiếm */}
-              {/* </button> */}
+              <button
+                onClick={handleSearch}
+                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition flex items-center gap-2"
+              >
+                <SearchIcon size={16} />
+                Tìm kiếm
+              </button>
             </div>
           </div>
         </div>
