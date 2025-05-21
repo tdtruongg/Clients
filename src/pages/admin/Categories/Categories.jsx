@@ -151,6 +151,39 @@ const Categories = () => {
 
   const columns = [
     {
+      title: "Hình ảnh",
+      dataIndex: "image",
+      key: "image",
+      width: 120,
+      render: (image) =>
+        image ? (
+          <img
+            src={image}
+            alt="category"
+            style={{
+              width: 60,
+              height: 60,
+              objectFit: "cover",
+              borderRadius: "4px",
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              width: 60,
+              height: 60,
+              backgroundColor: "#f0f0f0",
+              borderRadius: "4px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            No image
+          </div>
+        ),
+    },
+    {
       title: "Tên danh mục",
       dataIndex: "name",
       key: "name",
